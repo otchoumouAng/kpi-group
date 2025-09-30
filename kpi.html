@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPI Group - Cahier des Charges ERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Cool Blues and Warm Neutrals -->
+    <!-- Application Structure Plan: J'ai opté pour une structure de tableau de bord centralisé. L'utilisateur arrive sur une "Vue d'Ensemble" qui résume le projet avec une visualisation clé. Une barre de navigation supérieure permet de filtrer l'affichage pour se concentrer sur une seule filiale à la fois. Cette approche permet de passer facilement d'une vision macro (la répartition des modules) à une vision micro (les besoins spécifiques d'une entité), ce qui est idéal pour les chefs de projet, les développeurs et les décideurs qui ont besoin de niveaux d'information différents. Le flux est simple : vue globale -> sélection d'une filiale -> exploration des modules de cette filiale. -->
+    <!-- Visualization & Content Choices: 
+        - Répartition des Modules (Vue d'Ensemble) -> Objectif: Comparer -> Visualisation: Diagramme à barres (Chart.js) -> Interaction: Survol pour détails -> Justification: Permet de voir immédiatement quelles filiales ont le périmètre fonctionnel le plus large et quels modules sont les plus demandés.
+        - Objectifs du Projet -> Objectif: Informer -> Présentation: Liste stylisée avec icônes (HTML/Tailwind) -> Interaction: Aucune -> Justification: Présentation claire et concise des buts du projet.
+        - Exigences par Filiale -> Objectif: Organiser/Détailler -> Présentation: Cartes interactives type "accordéon" (HTML/JS) -> Interaction: Clic pour afficher/masquer les détails -> Justification: Évite de surcharger l'utilisateur d'informations. Il peut explorer les détails d'un module spécifique à son rythme sans être submergé par la totalité du texte.
+        - Exigences Non-Fonctionnelles -> Objectif: Informer -> Présentation: Cartes d'information (HTML/Tailwind) -> Interaction: Aucune -> Justification: Met en évidence les contraintes techniques importantes.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .nav-btn {
+            transition: all 0.3s ease;
+        }
+        .nav-btn.active {
+            background-color: #2563eb;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .module-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .module-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .module-details {
+            display: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .module-details.open {
+            display: block;
+            max-height: 1000px; 
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">PROJET ERP KPI GROUP</h1>
+            <p class="text-lg text-gray-600 mt-2">Cahier des Charges Interactif pour KPI Group</p>
+        </header>
+
+        <nav class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8">
+            <button class="nav-btn active font-semibold py-2 px-4 rounded-full bg-white shadow-sm border border-gray-200 flex items-center gap-2" data-target="overview"><i class="fa-solid fa-table-columns"></i>Vue d'Ensemble</button>
+            <button class="nav-btn font-semibold py-2 px-4 rounded-full bg-white shadow-sm border border-gray-200 flex items-center gap-2" data-target="italhome"><i class="fa-solid fa-building"></i>ITALHOME</button>
+            <button class="nav-btn font-semibold py-2 px-4 rounded-full bg-white shadow-sm border border-gray-200 flex items-center gap-2" data-target="salex"><i class="fa-solid fa-store"></i>SALEX</button>
+            <button class="nav-btn font-semibold py-2 px-4 rounded-full bg-white shadow-sm border border-gray-200 flex items-center gap-2" data-target="stuff"><i class="fa-solid fa-truck"></i>STUFF LOGISTICS</button>
+            <button class="nav-btn font-semibold py-2 px-4 rounded-full bg-white shadow-sm border border-gray-200 flex items-center gap-2" data-target="griot"><i class="fa-solid fa-bullhorn"></i>GRIOT</button>
+            <button class="nav-btn font-semibold py-2 px-4 rounded-full bg-white shadow-sm border border-gray-200 flex items-center gap-2" data-target="defi"><i class="fa-solid fa-chart-line"></i>DEFI GLOBAL</button>
+        </nav>
+
+        <main>
+            <!-- Vue d'Ensemble -->
+            <section id="overview" class="content-section active">
+                 <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 mb-8">
+                    <h2 class="text-2xl font-bold mb-4 text-center">Vision du Projet</h2>
+                    <p class="text-gray-600 text-center max-w-3xl mx-auto">Ce projet vise à développer une plateforme de gestion centralisée pour unifier les opérations, automatiser les processus et fournir des outils de pilotage performants à l'ensemble des filiales du groupe KPI.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8 items-start">
+                    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+                        <h3 class="text-xl font-bold mb-4">Objectifs Clés</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start"><i class="fa-solid fa-database text-blue-500 mr-3 mt-1 w-5 text-center"></i><div><strong class="font-semibold">Centralisation :</strong> Unifier les données sur une plateforme unique.</div></li>
+                            <li class="flex items-start"><i class="fa-solid fa-gears text-blue-500 mr-3 mt-1 w-5 text-center"></i><div><strong class="font-semibold">Automatisation :</strong> Optimiser les processus pour gagner en efficacité.</div></li>
+                            <li class="flex items-start"><i class="fa-solid fa-users text-blue-500 mr-3 mt-1 w-5 text-center"></i><div><strong class="font-semibold">Collaboration :</strong> Faciliter les échanges entre les filiales.</div></li>
+                            <li class="flex items-start"><i class="fa-solid fa-chart-pie text-blue-500 mr-3 mt-1 w-5 text-center"></i><div><strong class="font-semibold">Pilotage :</strong> Offrir des tableaux de bord pour la prise de décision.</div></li>
+                            <li class="flex items-start"><i class="fa-solid fa-arrows-up-to-line text-blue-500 mr-3 mt-1 w-5 text-center"></i><div><strong class="font-semibold">Évolutivité :</strong> Bâtir une solution modulaire et durable.</div></li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+                        <h3 class="text-xl font-bold mb-4 text-center">Répartition des Modules par Filiale</h3>
+                         <div class="chart-container relative h-80 w-full max-w-xl mx-auto">
+                            <canvas id="modulesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sections des filiales -->
+            <section id="italhome" class="content-section">
+                <h2 class="text-3xl font-bold mb-2 text-center">ITALHOME <span class="text-lg font-normal text-gray-500">(Construction)</span></h2>
+                <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto">Modules requis pour la gestion des projets de construction, depuis le suivi de chantier jusqu'à la gestion des équipes.</p>
+                <div class="space-y-4">
+                    <div class="module-card bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-3"><i class="fa-solid fa-list-check text-xl text-blue-600 w-6 text-center"></i><h3 class="text-lg font-semibold">Gestion de Projets</h3></div>
+                            <span class="text-blue-500 font-bold text-xl toggle-icon">+</span>
+                        </div>
+                        <div class="module-details mt-4 border-t pt-4">
+                            <ul class="list-disc list-inside text-gray-700 space-y-2 ml-9">
+                                <li>Création et suivi de projets de construction.</li>
+                                <li>Gestion des tâches, des plannings (diagramme de Gantt) et des jalons.</li>
+                                <li>Suivi du budget et des coûts par projet.</li>
+                                <li>Gestion documentaire : import des cahiers de charge, plans, rapports.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="module-card bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-3"><i class="fa-solid fa-id-card text-xl text-blue-600 w-6 text-center"></i><h3 class="text-lg font-semibold">Ressources Humaines</h3></div>
+                            <span class="text-blue-500 font-bold text-xl toggle-icon">+</span>
+                        </div>
+                        <div class="module-details mt-4 border-t pt-4">
+                            <ul class="list-disc list-inside text-gray-700 space-y-2 ml-9">
+                                <li>Gestion des employés et des équipes sur les chantiers.</li>
+                                <li>Suivi des temps et des activités.</li>
+                                <li>Gestion des congés et absences.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="salex" class="content-section">
+                <h2 class="text-3xl font-bold mb-2 text-center">SALEX <span class="text-lg font-normal text-gray-500">(Achats & Distribution)</span></h2>
+                <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto">Ensemble de modules pour piloter toute la chaîne commerciale, des achats auprès des fournisseurs à la vente aux clients.</p>
+                <div class="space-y-4">
+                    <div class="module-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><div class="flex justify-between items-center"><div class="flex items-center gap-3"><i class="fa-solid fa-credit-card text-xl text-green-600 w-6 text-center"></i><h3 class="text-lg font-semibold">Achats</h3></div><span class="text-blue-500 font-bold text-xl toggle-icon">+</span></div><div class="module-details mt-4 border-t pt-4"><ul class="list-disc list-inside text-gray-700 space-y-2 ml-9"><li>Gestion des fournisseurs et des appels d'offres.</li><li>Création et suivi des bons de commande.</li><li>Gestion des factures fournisseurs.</li></ul></div></div>
+                    <div class="module-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><div class="flex justify-between items-center"><div class="flex items-center gap-3"><i class="fa-solid fa-boxes-stacked text-xl text-green-600 w-6 text-center"></i><h3 class="text-lg font-semibold">Gestion des Stocks</h3></div><span class="text-blue-500 font-bold text-xl toggle-icon">+</span></div><div class="module-details mt-4 border-t pt-4"><ul class="list-disc list-inside text-gray-700 space-y-2 ml-9"><li>Suivi en temps réel de l'état des stocks de matériel.</li><li>Alertes de stock bas.</li><li>Gestion des entrées/sorties de marchandises.</li></ul></div></div>
+                    <div class="module-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><div class="flex justify-between items-center"><div class="flex items-center gap-3"><i class="fa-solid fa-handshake text-xl text-green-600 w-6 text-center"></i><h3 class="text-lg font-semibold">Ventes et CRM</h3></div><span class="text-blue-500 font-bold text-xl toggle-icon">+</span></div><div class="module-details mt-4 border-t pt-4"><ul class="list-disc list-inside text-gray-700 space-y-2 ml-9"><li>Gestion de la base de données clients (grossistes, etc.).</li><li>Création de devis, bons de commande clients et factures.</li><li>Suivi du pipeline de ventes.</li></ul></div></div>
+                    <div class="module-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><div class="flex justify-between items-center"><div class="flex items-center gap-3"><i class="fa-solid fa-wrench text-xl text-green-600 w-6 text-center"></i><h3 class="text-lg font-semibold">Moyens Généraux</h3></div><span class="text-blue-500 font-bold text-xl toggle-icon">+</span></div><div class="module-details mt-4 border-t pt-4"><ul class="list-disc list-inside text-gray-700 space-y-2 ml-9"><li>Gestion du patrimoine de l'entreprise (véhicules, équipements).</li><li>Suivi de la maintenance.</li></ul></div></div>
+                </div>
+            </section>
+            
+            <section id="stuff" class="content-section">
+                <h2 class="text-3xl font-bold mb-2 text-center">STUFF LOGISTICS <span class="text-lg font-normal text-gray-500">(Logistique)</span></h2>
+                 <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto">Fonctionnalités dédiées à l'optimisation des flux logistiques, du transport à la gestion avancée des entrepôts.</p>
+                <div class="space-y-4">
+                    <div class="module-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><div class="flex justify-between items-center"><div class="flex items-center gap-3"><i class="fa-solid fa-truck-fast text-xl text-orange-600 w-6 text-center"></i><h3 class="text-lg font-semibold">Logistique et Transport</h3></div><span class="text-blue-500 font-bold text-xl toggle-icon">+</span></div><div class="module-details mt-4 border-t pt-4"><ul class="list-disc list-inside text-gray-700 space-y-2 ml-9"><li>Planification des tournées de transport.</li><li>Suivi des véhicules et des livraisons en temps réel.</li><li>Gestion des documents de transport.</li></ul></div></div>
+                    <div class="module-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><div class="flex justify-between items-center"><div class="flex items-center gap-3"><i class="fa-solid fa-warehouse text-xl text-orange-600 w-6 text-center"></i><h3 class="text-lg font-semibold">Gestion des Stocks (avancé)</h3></div><span class="text-blue-500 font-bold text-xl toggle-icon">+</span></div><div class="module-details mt-4 border-t pt-4"><ul class="list-disc list-inside text-gray-700 space-y-2 ml-9"><li>Gestion d'entrepôt, emplacements.</li><li>Gestion des services de stockage pour les clients.</li></ul></div></div>
+                    <div class="module-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><div class="flex justify-between items-center"><div class="flex items-center gap-3"><i class="fa-solid fa-dolly text-xl text-orange-600 w-6 text-center"></i><h3 class="text-lg font-semibold">Approvisionnement</h3></div><span class="text-blue-500 font-bold text-xl toggle-icon">+</span></div><div class="module-details mt-4 border-t pt-4"><ul class="list-disc list-inside text-gray-700 space-y-2 ml-9"><li>Interface directe avec le module Achat de SALEX.</li></ul></div></div>
+                    <div class="module-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><div class="flex justify-between items-center"><div class="flex items-center gap-3"><i class="fa-solid fa-clipboard-check text-xl text-orange-600 w-6 text-center"></i><h3 class="text-lg font-semibold">État du Matériel</h3></div><span class="text-blue-500 font-bold text-xl toggle-icon">+</span></div><div class="module-details mt-4 border-t pt-4"><ul class="list-disc list-inside text-gray-700 space-y-2 ml-9"><li>Suivi de la disponibilité du matériel de location.</li><li>Planification de la maintenance préventive.</li></ul></div></div>
+                </div>
+            </section>
+            
+            <section id="griot" class="content-section">
+                <h2 class="text-3xl font-bold mb-2 text-center">GRIOT <span class="text-lg font-normal text-gray-500">(Communication)</span></h2>
+                 <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto">Outils pour le pilotage des campagnes marketing, la gestion de la relation client et la création de contenu.</p>
+                <div class="space-y-4">
+                     <div class="module-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><div class="flex justify-between items-center"><div class="flex items-center gap-3"><i class="fa-solid fa-flag-checkered text-xl text-purple-600 w-6 text-center"></i><h3 class="text-lg font-semibold">Gestion de Projets / Campagnes</h3></div><span class="text-blue-500 font-bold text-xl toggle-icon">+</span></div><div class="module-details mt-4 border-t pt-4"><ul class="list-disc list-inside text-gray-700 space-y-2 ml-9"><li>Suivi des campagnes publicitaires pour les clients.</li><li>Gestion des "créas pub" (livrables créatifs).</li><li>Planification des publications et des actions marketing.</li></ul></div></div>
+                     <div class="module-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><div class="flex justify-between items-center"><div class="flex items-center gap-3"><i class="fa-solid fa-code text-xl text-purple-600 w-6 text-center"></i><h3 class="text-lg font-semibold">Gestion de Contenu Web</h3></div><span class="text-blue-500 font-bold text-xl toggle-icon">+</span></div><div class="module-details mt-4 border-t pt-4"><ul class="list-disc list-inside text-gray-700 space-y-2 ml-9"><li>Outil simple pour la mise à jour de contenu sur les sites web gérés.</li></ul></div></div>
+                     <div class="module-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><div class="flex justify-between items-center"><div class="flex items-center gap-3"><i class="fa-solid fa-user-tie text-xl text-purple-600 w-6 text-center"></i><h3 class="text-lg font-semibold">CRM</h3></div><span class="text-blue-500 font-bold text-xl toggle-icon">+</span></div><div class="module-details mt-4 border-t pt-4"><ul class="list-disc list-inside text-gray-700 space-y-2 ml-9"><li>Suivi des prospects et des relations clients.</li></ul></div></div>
+                </div>
+            </section>
+
+            <section id="defi" class="content-section">
+                <h2 class="text-3xl font-bold mb-2 text-center">DEFI GLOBAL <span class="text-lg font-normal text-gray-500">(Immobilier)</span></h2>
+                 <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto">Solutions pour la gestion complète des projets de développement immobilier, du foncier à la commercialisation.</p>
+                <div class="space-y-4">
+                     <div class="module-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><div class="flex justify-between items-center"><div class="flex items-center gap-3"><i class="fa-solid fa-city text-xl text-red-600 w-6 text-center"></i><h3 class="text-lg font-semibold">Gestion de Projets Immobiliers</h3></div><span class="text-blue-500 font-bold text-xl toggle-icon">+</span></div><div class="module-details mt-4 border-t pt-4"><ul class="list-disc list-inside text-gray-700 space-y-2 ml-9"><li>Suivi des étapes clés d'un projet de développement.</li><li>Gestion financière des projets (cash-flow, rentabilité).</li></ul></div></div>
+                     <div class="module-card bg-white p-4 rounded-lg shadow-sm border border-gray-200"><div class="flex justify-between items-center"><div class="flex items-center gap-3"><i class="fa-solid fa-key text-xl text-red-600 w-6 text-center"></i><h3 class="text-lg font-semibold">Agence Immobilière (CRM)</h3></div><span class="text-blue-500 font-bold text-xl toggle-icon">+</span></div><div class="module-details mt-4 border-t pt-4"><ul class="list-disc list-inside text-gray-700 space-y-2 ml-9"><li>Gestion des biens immobiliers (à vendre, à louer).</li><li>Suivi des prospects, des visites et des offres.</li></ul></div></div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const contentSections = document.querySelectorAll('.content-section');
+            const moduleCards = document.querySelectorAll('.module-card');
+
+            // Navigation principale
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.dataset.target;
+
+                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    contentSections.forEach(section => {
+                        if (section.id === targetId) {
+                            section.classList.add('active');
+                        } else {
+                            section.classList.remove('active');
+                        }
+                    });
+                });
+            });
+
+            // Accordéon pour les modules
+            moduleCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const details = card.querySelector('.module-details');
+                    const icon = card.querySelector('.toggle-icon');
+                    const isOpen = details.classList.contains('open');
+
+                    details.classList.toggle('open');
+                    icon.textContent = isOpen ? '+' : '−';
+                });
+            });
+
+            // Chart.js
+            const ctx = document.getElementById('modulesChart').getContext('2d');
+            const chartData = {
+                labels: ['ITALHOME', 'SALEX', 'STUFF LOG.', 'GRIOT', 'DEFI GLOBAL'],
+                datasets: [{
+                    label: 'Nombre de modules requis',
+                    data: [2, 4, 4, 3, 2],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.7)',
+                        'rgba(16, 185, 129, 0.7)',
+                        'rgba(249, 115, 22, 0.7)',
+                        'rgba(139, 92, 246, 0.7)',
+                        'rgba(239, 68, 68, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(249, 115, 22, 1)',
+                        'rgba(139, 92, 246, 1)',
+                        'rgba(239, 68, 68, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
