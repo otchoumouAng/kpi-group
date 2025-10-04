@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide Interactif : Clés API WhatsApp Production</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: This SPA is designed as an interactive guided tutorial. It begins with a checklist for prerequisites to ensure the user is prepared. The core of the application uses a tabbed interface to cleanly separate the two main objectives: obtaining the PHONE_NUMBER_ID and generating the API_TOKEN. Each tab contains a series of step-by-step cards, breaking down the complex procedure into manageable actions. This structure enhances usability by preventing information overload and guiding the user through the technical process linearly and clearly, which is more effective than a static document. -->
+    <!-- Visualization & Content Choices: Report Info: Prerequisites -> Goal: Confirm readiness -> Presentation: Interactive checklist with icons -> Interaction: Visual confirmation -> Justification: Ensures user has all necessary components before starting the technical steps. | Report Info: Step-by-step instructions -> Goal: Guide user through a process -> Presentation: Tabbed interface with numbered cards -> Interaction: User clicks tabs to switch between the two main procedures -> Justification: Organizes the guide into two distinct, logical parts, making it less overwhelming. | Report Info: Final credentials -> Goal: Inform and provide utility -> Presentation: Styled code blocks -> Interaction: "Copy" button -> Justification: Simulates the developer workflow and provides a clear summary of the goal. | Report Info: Warnings -> Goal: Emphasize critical info -> Presentation: Visually distinct callout boxes -> Justification: Prevents users from missing crucial details, like saving the API token. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .tab-button.active {
+            border-color: #10b981;
+            background-color: #ecfdf5;
+            color: #065f46;
+        }
+        .tab-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .step-card {
+            background-color: white;
+            border-left: 4px solid #10b981;
+        }
+        .prerequisite-item.completed {
+            text-decoration: line-through;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="container mx-auto max-w-5xl p-4 sm:p-6 md:p-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-900">Obtenir vos Clés API WhatsApp pour la Production</h1>
+            <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">Un guide interactif pour générer votre `PHONE_NUMBER_ID` et votre `API_TOKEN` permanent, étape par étape.</p>
+        </header>
+
+        <main>
+            <section id="prerequisites" class="mb-12">
+                <h2 class="text-2xl font-bold mb-6 text-slate-900 border-b pb-3">✅ Avant de Commencer : Prérequis</h2>
+                <div class="space-y-4 text-slate-700">
+                    <p class="mb-6">Assurez-vous d'avoir complété chaque point ci-dessous avant de continuer. Ceci est essentiel pour que le processus fonctionne correctement.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                         <div class="prerequisite-item bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex items-start space-x-4">
+                            <span class="text-2xl mt-1">🏢</span>
+                            <div>
+                                <h3 class="font-semibold text-slate-900">Compte Meta Business</h3>
+                                <p class="text-sm">Vous devez posséder un compte Meta Business Manager actif.</p>
+                            </div>
+                        </div>
+                        <div class="prerequisite-item bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex items-start space-x-4">
+                            <span class="text-2xl mt-1">📜</span>
+                            <div>
+                                <h3 class="font-semibold text-slate-900">Entreprise Vérifiée</h3>
+                                <p class="text-sm">Votre entreprise doit être officiellement vérifiée par Meta.</p>
+                            </div>
+                        </div>
+                        <div class="prerequisite-item bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex items-start space-x-4">
+                            <span class="text-2xl mt-1">📱</span>
+                            <div>
+                                <h3 class="font-semibold text-slate-900">Numéro de Téléphone Dédié</h3>
+                                <p class="text-sm">Un numéro qui n'est lié à aucun compte WhatsApp existant.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="process">
+                <h2 class="text-2xl font-bold mb-6 text-slate-900 border-b pb-3">⚙️ Le Processus Détaillé</h2>
+                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-8 border-b border-slate-200">
+                    <button id="tab-btn-id" class="tab-button active w-full sm:w-auto text-left sm:text-center text-lg font-medium p-4 border-b-4 rounded-t-md">1. Obtenir le PHONE_NUMBER_ID</button>
+                    <button id="tab-btn-token" class="tab-button w-full sm:w-auto text-left sm:text-center text-lg font-medium p-4 border-b-4 border-transparent">2. Générer l'API_TOKEN Permanent</button>
+                </div>
+
+                <div id="tab-content-id" class="tab-content space-y-6">
+                    <p class="text-slate-600 mb-6">Suivez ces étapes pour trouver l'identifiant unique et permanent associé à votre numéro de téléphone professionnel.</p>
+                    <div class="step-card p-6 rounded-lg shadow-sm">
+                        <p class="text-lg font-semibold mb-2"><span class="bg-emerald-100 text-emerald-800 rounded-full h-8 w-8 inline-flex items-center justify-center font-bold mr-3">1</span>Connexion au Business Manager</p>
+                        <p>Connectez-vous à votre compte sur <a href="https://business.facebook.com" target="_blank" class="text-emerald-600 font-medium hover:underline">business.facebook.com</a>.</p>
+                    </div>
+                    <div class="step-card p-6 rounded-lg shadow-sm">
+                        <p class="text-lg font-semibold mb-2"><span class="bg-emerald-100 text-emerald-800 rounded-full h-8 w-8 inline-flex items-center justify-center font-bold mr-3">2</span>Accès aux Paramètres d'Entreprise</p>
+                        <p>Dans le menu principal, naviguez vers les **Paramètres d'entreprise**.</p>
+                    </div>
+                    <div class="step-card p-6 rounded-lg shadow-sm">
+                        <p class="text-lg font-semibold mb-2"><span class="bg-emerald-100 text-emerald-800 rounded-full h-8 w-8 inline-flex items-center justify-center font-bold mr-3">3</span>Comptes WhatsApp</p>
+                        <p>Dans le menu de gauche, sous `Comptes`, cliquez sur **Comptes WhatsApp**.</p>
+                    </div>
+                    <div class="step-card p-6 rounded-lg shadow-sm">
+                        <p class="text-lg font-semibold mb-2"><span class="bg-emerald-100 text-emerald-800 rounded-full h-8 w-8 inline-flex items-center justify-center font-bold mr-3">4</span>Gestionnaire de WhatsApp</p>
+                        <p>Sélectionnez votre compte (WABA), cliquez sur **Paramètres**, puis **Paramètres du gestionnaire de WhatsApp**. Un nouvel onglet s'ouvrira.</p>
+                         <div class="mt-4 p-4 bg-slate-100 rounded-md text-center text-slate-500 italic">
+                           Placeholder: Image d'un bouton de paramètres dans le Meta Business Manager
+                        </div>
+                    </div>
+                    <div class="step-card p-6 rounded-lg shadow-sm">
+                        <p class="text-lg font-semibold mb-2"><span class="bg-emerald-100 text-emerald-800 rounded-full h-8 w-8 inline-flex items-center justify-center font-bold mr-3">5</span>Trouver et Copier l'ID</p>
+                        <p>Dans le nouvel onglet, allez à `Comptes` > **Numéros de téléphone**. Vous y trouverez l'**ID de numéro de téléphone**. Copiez-le.</p>
+                    </div>
+                </div>
+
+                <div id="tab-content-token" class="tab-content hidden space-y-6">
+                    <p class="text-slate-600 mb-6">Un jeton temporaire expire en 24h. Pour la production, créez un jeton permanent via un **Utilisateur Système**.</p>
+                     <div class="step-card p-6 rounded-lg shadow-sm">
+                        <p class="text-lg font-semibold mb-2"><span class="bg-emerald-100 text-emerald-800 rounded-full h-8 w-8 inline-flex items-center justify-center font-bold mr-3">1</span>Créer un Utilisateur Système</p>
+                        <p>Retournez aux **Paramètres d'entreprise**. Sous `Utilisateurs`, allez à **Utilisateurs système**. Cliquez sur **Ajouter**, donnez-lui un nom (ex: `whatsapp_api_user`) et un rôle **Administrateur**.</p>
+                    </div>
+                    <div class="step-card p-6 rounded-lg shadow-sm">
+                        <p class="text-lg font-semibold mb-2"><span class="bg-emerald-100 text-emerald-800 rounded-full h-8 w-8 inline-flex items-center justify-center font-bold mr-3">2</span>Assigner des Actifs</p>
+                        <p>Cliquez sur **Ajouter des actifs**. Choisissez `Applications`, sélectionnez votre application, et activez le contrôle total pour **`whatsapp_business_messaging`** et **`whatsapp_business_management`**.</p>
+                         <div class="mt-4 p-4 bg-slate-100 rounded-md text-center text-slate-500 italic">
+                           Placeholder: Image de l'interface d'assignation des actifs
+                        </div>
+                    </div>
+                    <div class="step-card p-6 rounded-lg shadow-sm">
+                        <p class="text-lg font-semibold mb-2"><span class="bg-emerald-100 text-emerald-800 rounded-full h-8 w-8 inline-flex items-center justify-center font-bold mr-3">3</span>Générer le Jeton Permanent</p>
+                        <p>Sur la page de l'utilisateur système, cliquez sur **Générer un nouveau jeton**. Sélectionnez votre application, puis choisissez une date d'expiration : **Jamais**.</p>
+                    </div>
+                    <div class="bg-amber-100 border-l-4 border-amber-500 text-amber-900 p-4 rounded-r-lg" role="alert">
+                      <p class="font-bold">⚠️ Attention : Sauvegarde Cruciale</p>
+                      <p>Copiez le jeton généré et stockez-le immédiatement dans un endroit sécurisé (gestionnaire de secrets, variable d'environnement). **Il ne sera plus jamais affiché en entier.**</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="summary" class="mt-16 pt-8 border-t">
+                 <h2 class="text-2xl font-bold mb-6 text-slate-900">🔑 Vos Clés de Production</h2>
+                 <p class="text-slate-600 mb-6">Une fois le processus terminé, vous disposerez de ces deux identifiants. Utilisez-les dans vos variables d'environnement pour une intégration sécurisée.</p>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="font-semibold text-slate-700 block mb-2">WHATSAPP_PHONE_NUMBER_ID</label>
+                        <div class="relative">
+                           <input id="phone-id-output" type="text" class="bg-slate-100 text-slate-700 font-mono w-full p-3 rounded-md border border-slate-200" value="100001234567890" readonly>
+                           <button onclick="copyToClipboard('phone-id-output', this)" class="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-200 hover:bg-slate-300 text-slate-600 text-xs font-semibold py-1 px-2 rounded">Copier</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="font-semibold text-slate-700 block mb-2">WHATSAPP_API_TOKEN</label>
+                        <div class="relative">
+                            <input id="api-token-output" type="text" class="bg-slate-100 text-slate-700 font-mono w-full p-3 rounded-md border border-slate-200" value="EAAJ...ZDZD" readonly>
+                            <button onclick="copyToClipboard('api-token-output', this)" class="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-200 hover:bg-slate-300 text-slate-600 text-xs font-semibold py-1 px-2 rounded">Copier</button>
+                        </div>
+                    </div>
+                 </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const tabBtnId = document.getElementById('tab-btn-id');
+        const tabBtnToken = document.getElementById('tab-btn-token');
+        const contentId = document.getElementById('tab-content-id');
+        const contentToken = document.getElementById('tab-content-token');
+
+        function switchTab(activeBtn, inactiveBtn, activeContent, inactiveContent) {
+            activeBtn.classList.add('active');
+            inactiveBtn.classList.remove('active');
+            activeContent.classList.remove('hidden');
+            inactiveContent.classList.add('hidden');
+        }
+
+        tabBtnId.addEventListener('click', () => {
+            switchTab(tabBtnId, tabBtnToken, contentId, contentToken);
+        });
+
+        tabBtnToken.addEventListener('click', () => {
+            switchTab(tabBtnToken, tabBtnId, contentToken, contentId);
+        });
+
+        function copyToClipboard(elementId, button) {
+            const input = document.getElementById(elementId);
+            const textToCopy = input.value;
+            
+            if (document.execCommand) {
+                const tempInput = document.createElement('input');
+                tempInput.style.position = 'absolute';
+                tempInput.style.left = '-9999px';
+                tempInput.value = textToCopy;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                try {
+                    document.execCommand('copy');
+                    button.textContent = 'Copié!';
+                    setTimeout(() => { button.textContent = 'Copier'; }, 2000);
+                } catch (err) {
+                    console.error('Fallback: Oops, unable to copy', err);
+                }
+                document.body.removeChild(tempInput);
+            } else {
+                 console.error('Fallback: execCommand is not supported');
+            }
+        }
+    </script>
+</body>
+</html>
