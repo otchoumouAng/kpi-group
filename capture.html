@@ -73,8 +73,8 @@
             try {
                 // Construction de l'URL avec les paramètres de requête
                 const url = new URL(API_URL);
-                if (COMPANY) url.searchParams.append('company', COMPANY);
-                if (DESKTOP) url.searchParams.append('desktop', DESKTOP);
+                //if (COMPANY) url.searchParams.append('company', COMPANY);
+                //if (DESKTOP) url.searchParams.append('desktop', DESKTOP);
 
                 // Appel à l'API locale avec fetch
                 const response = await fetch(url.toString());
