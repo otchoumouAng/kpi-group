@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testeur API Poids Local</title>
+    <!-- Intégration de Tailwind CSS pour un style professionnel rapide -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Police de caractères Inter pour une meilleure lisibilité -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg p-8 m-4">
+        
+        <header class="mb-6 text-center">
+            <h1 class="text-3xl font-bold text-gray-800">Interface de Test pour OdmService</h1>
+            <p class="text-gray-500 mt-2">Cette page communique avec le service local pour lire la dernière pesée enregistrée.</p>
+        </header>
+
+        <div class="text-center mb-6">
+            <button id="readButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M7 2a1 1 0 00-.707 1.707L8.586 6H4a1 1 0 000 2h4.586l-2.293 2.293A1 1 0 107.707 11.707l4-4a1 1 0 000-1.414l-4-4A1 1 0 007 2z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M13.293 8.293a1 1 0 00-1.414 0L9.586 10.586 7.293 8.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 000-1.414z" clip-rule="evenodd" />
+                </svg>
+                Lire le dernier poids
+            </button>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg p-4">
+            <h2 class="text-lg font-semibold text-gray-700 mb-2">Résultat de l'API :</h2>
+            <!-- Zone pour afficher le statut de la requête -->
+            <div id="status" class="p-3 mb-4 rounded-md text-sm font-medium text-gray-700 bg-gray-200">
+                En attente d'une action...
+            </div>
+            <!-- Zone pour afficher les données brutes de l'API -->
+            <pre id="result" class="bg-gray-900 text-white text-sm rounded-md p-4 overflow-x-auto"><code>// Les données JSON de la réponse apparaîtront ici.</code></pre>
+        </div>
+
+    </div>
+
+    <script>
+        const readButton = document.getElementById('readButton');
+        const resultDiv = document.getElementById('result');
+        const statusDiv = document.getElementById('status');
+        
+        // --- CONFIGURATION ---
+        // L'URL de l'API locale exposée par votre OdmService.py
+        const API_URL = 'http://localhost:5000/api/poids';
+        
+        // Paramètres pour filtrer la recherche (peut être laissé vide)
+        // Note: Le service récupère le dernier poids toutes machines confondues si ces paramètres sont omis.
+        const COMPANY = "SITC, SAN-PEDRO"; 
+        // Le nom du bureau sera récupéré dynamiquement, mais pour ce test, on peut le laisser vide
+        // ou le hardcoder si nécessaire. Le service l'ignore s'il n'est pas fourni.
+        const DESKTOP = ""; 
+
+        readButton.addEventListener('click', async () => {
+            // Mise à jour de l'interface pour indiquer le chargement
+            statusDiv.textContent = 'Communication avec le service en cours...';
+            statusDiv.className = 'p-3 mb-4 rounded-md text-sm font-medium text-yellow-800 bg-yellow-100';
+            resultDiv.querySelector('code').textContent = '// En attente de la réponse...';
+            readButton.disabled = true;
+
+            try {
+                // Construction de l'URL avec les paramètres de requête
+                const url = new URL(API_URL);
+                if (COMPANY) url.searchParams.append('company', COMPANY);
+                if (DESKTOP) url.searchParams.append('desktop', DESKTOP);
+
+                // Appel à l'API locale avec fetch
+                const response = await fetch(url.toString());
+
+                // Vérification si la requête a réussi (status 200-299)
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Affichage du succès
+                    statusDiv.textContent = 'Succès ! Dernière pesée récupérée.';
+                    statusDiv.className = 'p-3 mb-4 rounded-md text-sm font-medium text-green-800 bg-green-100';
+                    
+                    // Formatage et affichage de la réponse JSON
+                    resultDiv.querySelector('code').textContent = JSON.stringify(data, null, 2);
+
+                } else {
+                    // Gestion des erreurs HTTP (ex: 404 Not Found)
+                    const errorData = await response.json();
+                    statusDiv.textContent = `Erreur de l'API (Status: ${response.status}): ${errorData.error || 'Réponse non valide'}`;
+                    statusDiv.className = 'p-3 mb-4 rounded-md text-sm font-medium text-red-800 bg-red-100';
+                    resultDiv.querySelector('code').textContent = JSON.stringify(errorData, null, 2);
+                }
+
+            } catch (error) {
+                // Gestion des erreurs de connexion (service non démarré, CORS, etc.)
+                console.error("Erreur de connexion:", error);
+                statusDiv.textContent = 'Erreur de connexion. Le service OdmService est-il bien démarré ? Vérifiez la console (F12) pour plus de détails.';
+                statusDiv.className = 'p-3 mb-4 rounded-md text-sm font-medium text-red-800 bg-red-100';
+                resultDiv.querySelector('code').textContent = `// ${error.message}`;
+            } finally {
+                // Réactivation du bouton
+                readButton.disabled = false;
+            }
+        });
+    </script>
+
+</body>
+</html>
